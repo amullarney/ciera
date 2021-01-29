@@ -9,6 +9,6 @@
         public int getId() {
             return SIGNAL_NO_$u{self.name};
         }
- 
     }
     public void ${self.name}(${parameter_list}) throws XtumlException;
+

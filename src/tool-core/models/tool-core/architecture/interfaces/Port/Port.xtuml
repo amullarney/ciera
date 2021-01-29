@@ -61,7 +61,39 @@ end if;
 
 T::include(file:"interface/t.port.java");
 T::emit( file:file.path + "/" + self.name + file.extension );
-T::clear();',
+T::clear();
+
+LOG::LogInfo( message:"++am- Rendered Port: " + file.path + "/" + self.name + file.extension );
+select any port_mark from instances of Mark where ( selected.markable_name == "Port" );
+if ( not_empty port_mark )
+  if ( port_mark.value == self.name )
+    LOG::LogInfo( message:"++am - found Port mark " + port_mark.feature_name +  " for " + self.name );
+    LOG::LogInfo( message:"++am Port name is " + self.name );
+    LOG::LogInfo( message:"++am Port Package name is " + self.package );
+    for each msg in outbound_port_msgs
+      LOG::LogInfo( message:"++am to provider Msg " + msg.msg_name );
+      select many parms related by msg->InvocableObject[R427]->FormalParameter[R429.''declares signature with''];
+      for each parm in parms
+      	len = STRING::strlen( s:parm.name);
+      	name = STRING::substr( s:parm.name, begin:2, end:len );
+      	name = ::camelCaseName( name:name, start_lower:true );
+      	LOG::LogInfo( message:"++am Param camel_cased = " + name );
+      end for;
+    end for;
+    for each msg in inbound_port_msgs
+      LOG::LogInfo( message:"++am from provider Msg " + msg.msg_name );
+      select many parms related by msg->InvocableObject[R427]->FormalParameter[R429.''declares signature with''];
+      for each parm in parms
+      	len = STRING::strlen( s:parm.name);
+      	name = STRING::substr( s:parm.name, begin:2, end:len );
+      	name = ::camelCaseName( name:name, start_lower:true );
+      	LOG::LogInfo( message:"++am Param camel_cased = " + name );
+      end for;
+    end for;
+  end if;
+end if;
+
+',
 	1,
 	'',
 	"00000000-0000-0000-0000-000000000000",
