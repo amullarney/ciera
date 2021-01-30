@@ -93,28 +93,28 @@ INSERT INTO O_TFR
 	"ba5eda7a-def5-0000-0000-000000000000",
 	1,
 	'// Render a Java class that corresponds to the port message.
+// The member names are derived by stripping the "p_" prefix from the FormalParameter names. @TODO
 // For each parameter of the message, render it first as a String data member.
 // Then, for each, render the get and set methods.
-// Note: data member and method names must be formatted as required by the framework.
+// Note: method names must be formatted as required by the framework. 
+// - Spring requires an upper case character immediately after get/set method prefixes.
 // Finally, emit the class definition as a file in the same package as the port.
 // The auxiliary ''messageName'' member support is scripted in the class template.
 //
 select many parms related by self->InvocableObject[R427]->FormalParameter[R429.''declares signature with''];
 for each parm in parms
-  pname = STRING::substr( s:parm.name, begin:2, end:-1 );
-  firstchar = STRING::substr( s:pname, begin:0, end:1 );
-  mname = T::sub( format:"l", s:firstchar ) + STRING::substr( s:pname, begin:1, end:-1 );
+  mname = STRING::substr( s:parm.name, begin:2, end:-1 );
   T::include(file:"interface/t.port.msgclass.member.java");
 end for;
 data_block = T::body();
 T::clear();
 
 for each parm in parms
-  pname = STRING::substr( s:parm.name, begin:2, end:-1 );
-  firstchar = STRING::substr( s:pname, begin:0, end:1 );
-  mname = T::sub( format:"l", s:firstchar ) + STRING::substr( s:pname, begin:1, end:-1 );
-  getm = "get" + pname;
-  setm = "set" + pname;
+  mname = STRING::substr( s:parm.name, begin:2, end:-1 );
+  firstchar = STRING::substr( s:mname, begin:0, end:1 );
+  fname = T::sub( format:"c", s:firstchar ) + STRING::substr( s:mname, begin:1, end:-1 );
+  getm = "get" + fname;
+  setm = "set" + fname;
   T::include(file:"interface/t.port.msgclass.methods.java");
 end for;
 code_block = T::body();

@@ -65,7 +65,8 @@ T::clear();
 
 // If this port is marked for message class generation, render the classes.
 select any port_mark from instances of Mark where ( selected.markable_name == "Port" )
-											 and ( selected.value == self.name );
+                                              and ( selected.feature_name == "MsgClasses" )
+											  and ( selected.value == self.name );
 if ( not_empty port_mark )
   self.render_msgclasses();
 end if;
