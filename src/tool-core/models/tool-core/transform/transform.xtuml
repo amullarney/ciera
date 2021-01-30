@@ -2437,18 +2437,6 @@ relate port to file across R401;
 relate port to c_po across R422;
 port.port_name = ::camelCaseName( name:c_po.Name, start_lower:false );
 
-select any port_mark from instances of Mark where ( selected.markable_name == "Port" );
-if ( not_empty port_mark )
-  if ( port_mark.value == port.name )
-    LOG::LogInfo( message:"++am - found Port mark " + port_mark.feature_name +  " for " + port.name );
-    LOG::LogInfo( message:"++am Transforming Port " + port.name );
-    LOG::LogInfo( message:"++am File package " + file.package );
-    LOG::LogInfo( message:"++am File path " + file.path );
-    LOG::LogInfo( message:"++am File name " + file.name );
-  end if;
-end if;
-
-
 // set base class
 select any base_class_mark from instances of Mark where ( selected.markable_name == "Port" and
                                                           selected.path == ::containerMarkingPath( pe:pe ) + "::" + c_c.Name + "::" + c_po.Name and
@@ -2483,7 +2471,6 @@ if ( not_empty iface )
   select many msgs related by iface->Message[R419];
   for each msg in msgs
     ::transformPortMessage( port:port, msg:msg );
-    LOG::LogInfo( message:"++am Transformed (port) message " + msg.name );
   end for;
   select one iface_file related by iface->File[R401];
   ::addFileToImports( file:file, file_to_import:iface_file, type:ImportType::IMPL );
@@ -2569,8 +2556,6 @@ invocable.name = msg.name;
 invocable.parent_name = port.name;
 invocable.parent_package = port.package;
 relate port_msg to invocable across R427;
-
-LOG::LogInfo( message:"++am Transforming port message " + msg.name + " for package " + port.package );
 
 // populate the OAL
 invocable.oal = "";

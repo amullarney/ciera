@@ -33,31 +33,7 @@ T::clear();
 
 T::include(file:"interface/t.interface.java");
 T::emit( file:file.path + "/" + self.name + file.extension );
-T::clear();
-
-/*
-LOG::LogInfo( message:"++am- Rendered interface: " + file.path + "/" + self.name + file.extension );
-
-select any interface_mark from instances of Mark where ( selected.markable_name == "Interface" );
-if ( not_empty interface_mark )
-  if ( interface_mark.value == self.name )
-    LOG::LogInfo( message:"++am - found Interface mark " + interface_mark.feature_name +  " for " + self.name );
-    select any port related by self->Port[R418.''is implemented by'']
-     where ( selected.iface_name == self.name ) and ( selected.iface_package == self.package );
-    LOG::LogInfo( message:"++am Port name is " + port.name );
-    LOG::LogInfo( message:"++am Port Package name is " + port.package );
-    LOG::LogInfo( message:"++am Interface Package name is " + self.package );
-    for each msg in to_provider_msgs
-      LOG::LogInfo( message:"++am to provider Msg " + msg.name );
-    end for;
-    for each msg in from_provider_msgs
-      LOG::LogInfo( message:"++am from provider Msg " + msg.name );
-    end for;
-    LOG::LogInfo( message:"++am Done with this Interface, for now" );
-  end if;
-end if;
-*/
-',
+T::clear();',
 	1,
 	'',
 	"00000000-0000-0000-0000-000000000000",

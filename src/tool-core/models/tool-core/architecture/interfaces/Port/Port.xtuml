@@ -63,34 +63,11 @@ T::include(file:"interface/t.port.java");
 T::emit( file:file.path + "/" + self.name + file.extension );
 T::clear();
 
-LOG::LogInfo( message:"++am- Rendered Port: " + file.path + "/" + self.name + file.extension );
-select any port_mark from instances of Mark where ( selected.markable_name == "Port" );
+// If this port is marked for message class generation, render the classes.
+select any port_mark from instances of Mark where ( selected.markable_name == "Port" )
+											 and ( selected.value == self.name );
 if ( not_empty port_mark )
-  if ( port_mark.value == self.name )
-    LOG::LogInfo( message:"++am - found Port mark " + port_mark.feature_name +  " for " + self.name );
-    LOG::LogInfo( message:"++am Port name is " + self.name );
-    LOG::LogInfo( message:"++am Port Package name is " + self.package );
-    for each msg in outbound_port_msgs
-      LOG::LogInfo( message:"++am to provider Msg " + msg.msg_name );
-      select many parms related by msg->InvocableObject[R427]->FormalParameter[R429.''declares signature with''];
-      for each parm in parms
-      	len = STRING::strlen( s:parm.name);
-      	name = STRING::substr( s:parm.name, begin:2, end:len );
-      	name = ::camelCaseName( name:name, start_lower:true );
-      	LOG::LogInfo( message:"++am Param camel_cased = " + name );
-      end for;
-    end for;
-    for each msg in inbound_port_msgs
-      LOG::LogInfo( message:"++am from provider Msg " + msg.msg_name );
-      select many parms related by msg->InvocableObject[R427]->FormalParameter[R429.''declares signature with''];
-      for each parm in parms
-      	len = STRING::strlen( s:parm.name);
-      	name = STRING::substr( s:parm.name, begin:2, end:len );
-      	name = ::camelCaseName( name:name, start_lower:true );
-      	LOG::LogInfo( message:"++am Param camel_cased = " + name );
-      end for;
-    end for;
-  end if;
+  self.render_msgclasses();
 end if;
 
 ',
@@ -109,6 +86,22 @@ INSERT INTO O_TFR
 	1,
 	'',
 	"a8cd2a5e-e4c5-4db2-b940-626a586c3f07",
+	0);
+INSERT INTO O_TFR
+	VALUES ("97d7d292-fa97-4c46-a953-3d9ea2a13014",
+	"28dc1d65-54a1-4be8-98f3-a6f65c69cdff",
+	'render_msgclasses',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	1,
+	'// render Java classes corresponding to messages
+select many port_msgs related by self->PortMessage[R420];
+for each port_msg in port_msgs
+  port_msg.render_msgclass(); 
+end for;',
+	1,
+	'',
+	"7776c784-fbf8-4369-9cd5-84c095894790",
 	0);
 INSERT INTO O_NBATTR
 	VALUES ("0b8a6150-198d-4c91-af5c-396d50582215",
