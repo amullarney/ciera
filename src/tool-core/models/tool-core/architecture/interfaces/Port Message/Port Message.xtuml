@@ -125,7 +125,7 @@ select one file related by port->File[R401];
 // ''borrow'' the file package and path from the port that owns these messages
 pkg = file.package;
 T::include(file:"interface/t.port.msgclass.java");
-T::emit( file:file.path + "/" + self.msg_name + ".java" );
+T::emit( file:file.path + "/" + self.msg_name + "Msg.java" );
 T::clear();',
 	1,
 	'',
