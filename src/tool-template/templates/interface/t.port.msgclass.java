@@ -1,6 +1,6 @@
 package ${pkg};
 
-  public class ${self.msg_name} {
+  public class ${self.msg_name}Msg {
     private String messageName;
 ${data_block}
 ${code_block}
