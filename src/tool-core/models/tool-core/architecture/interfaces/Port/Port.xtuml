@@ -69,8 +69,12 @@ select any port_mark from instances of Mark where ( selected.markable_name == "P
 											  and ( selected.value == self.name );
 if ( not_empty port_mark )
   self.render_msgclasses();
+  self.render_msgcontroller();
+  LOG::LogInfo( message:"++am port name : " + self.port_name );
+  LOG::LogInfo( message:"++am iface name : " + self.iface_name );
+  LOG::LogInfo( message:"++am provider port name : " + self.provider_port_name );
+  LOG::LogInfo( message:"++am comp name : " + self.comp_name );
 end if;
-
 ',
 	1,
 	'',
@@ -103,6 +107,54 @@ end for;',
 	1,
 	'',
 	"7776c784-fbf8-4369-9cd5-84c095894790",
+	0);
+INSERT INTO O_TFR
+	VALUES ("6fe77ff8-eb76-4a8f-87a3-724621753c5c",
+	"28dc1d65-54a1-4be8-98f3-a6f65c69cdff",
+	'render_msgcontroller',
+	'',
+	"ba5eda7a-def5-0000-0000-000000000000",
+	1,
+	'// render Java msgcontroller class.
+
+comp = self.comp_name;
+port = self.port_name;
+
+// render inbound messages
+select many inbound_msgs related by self->Interface[R418]->Message[R419] where ( ( not selected.to_provider and not self.provider ) or
+                                                                                 ( selected.to_provider and self.provider ) );
+select many inbound_port_msgs related by inbound_msgs->PortMessage[R420] where ( selected.port_name == self.name );
+inbound = true;
+for each port_msg in inbound_port_msgs
+  mname = port_msg.msg_name;
+  LOG::LogInfo( message:"++am " + comp + " " + port + " " + mname );
+//  T::include(file:"interface/t.port.controller.msg.java");
+end for;
+inbound_message_block = T::body();
+T::clear();
+
+// render outbound messages
+select many outbound_msgs related by self->Interface[R418]->Message[R419] where ( ( selected.to_provider and not self.provider ) or
+                                                                                  ( not selected.to_provider and self.provider ) );
+select many outbound_port_msgs related by outbound_msgs->PortMessage[R420] where ( selected.port_name == self.name );
+inbound = false;
+for each port_msg in outbound_port_msgs
+  mname = port_msg.msg_name;
+  LOG::LogInfo( message:"++am " + comp + " " + port + " " + mname );
+//  T::include(file:"interface/t.port.controller.msg.java");
+end for;
+outbound_message_block = T::body();
+T::clear();
+
+select one file related by self->File[R401];
+pkg = file.package;
+T::include(file:"interface/t.port.msgcontroller.java");
+T::emit( file:file.path + "/" + self.name + "MsgController.java" );
+T::clear();
+',
+	1,
+	'',
+	"97d7d292-fa97-4c46-a953-3d9ea2a13014",
 	0);
 INSERT INTO O_NBATTR
 	VALUES ("0b8a6150-198d-4c91-af5c-396d50582215",
