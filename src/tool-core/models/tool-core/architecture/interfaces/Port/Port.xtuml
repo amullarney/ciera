@@ -70,10 +70,21 @@ select any port_mark from instances of Mark where ( selected.markable_name == "P
 if ( not_empty port_mark )
   self.render_msgclasses();
   self.render_msgcontroller();
+  LOG::LogInfo( message:"++am Found Port marked for message generation" );
+  LOG::LogInfo( message:"++am self name : " + self.name );
   LOG::LogInfo( message:"++am port name : " + self.port_name );
   LOG::LogInfo( message:"++am iface name : " + self.iface_name );
   LOG::LogInfo( message:"++am provider port name : " + self.provider_port_name );
   LOG::LogInfo( message:"++am comp name : " + self.comp_name );
+  LOG::LogInfo( message:"++am base class : " + self.base_class );
+  select one other related by self->Port[R4160.''satisfies required''];
+  if ( not_empty other )
+    LOG::LogInfo( message:"++am other that satisfies required : " + other.name );
+  end if;
+  select one other related by self->Port[R4160.''satisfies provided''];
+  if ( not_empty other )
+    LOG::LogInfo( message:"++am other that satisfies provided : " + other.name );
+  end if;
 end if;
 ',
 	1,
@@ -120,30 +131,42 @@ INSERT INTO O_TFR
 comp = self.comp_name;
 port = self.port_name;
 
-// render messages outgoing from the msgcontroller; these will be ''sent'' across the network.
-select many outgoing_msgs related by self->Interface[R418]->Message[R419] where ( ( not selected.to_provider and not self.provider ) or
-                                                                                 ( selected.to_provider and self.provider ) );
-select many outgoing_port_msgs related by outgoing_msgs->PortMessage[R420] where ( selected.port_name == self.name );
-inbound = false;
-for each port_msg in outgoing_port_msgs
+// render messages incoming from the network; these will invoke xtUML port activities.
+select many fromNetwork_msgs related by self->Interface[R418]->Message[R419] where ( ( selected.to_provider and not self.provider ) or
+                                                                                  ( not selected.to_provider and self.provider ) );
+select many fromNetwork_port_msgs related by fromNetwork_msgs->PortMessage[R420] where ( selected.port_name == self.name );
+inbound = true;
+msg_sets = "";  // for now...
+for each port_msg in fromNetwork_port_msgs
   mname = port_msg.msg_name;
-  LOG::LogInfo( message:"++am " + comp + " " + port + " " + mname );
-  T::include(file:"interface/t.port.controllermsg.java");
+//  T::include(file:"interface/t.port.controllermsg.java");
 end for;
-outbound_message_block = T::body();
+fromnet_message_block = T::body();
 T::clear();
 
-// render messages incoming from the network; these will invoke xtUML port activities.
-select many incoming_msgs related by self->Interface[R418]->Message[R419] where ( ( selected.to_provider and not self.provider ) or
-                                                                                  ( not selected.to_provider and self.provider ) );
-select many incoming_port_msgs related by incoming_msgs->PortMessage[R420] where ( selected.port_name == self.name );
-inbound = true;
-for each port_msg in incoming_port_msgs
+// render messages outgoing from the msgcontroller; these will be ''sent'' across the network.
+select many toNetwork_msgs related by self->Interface[R418]->Message[R419] where ( ( not selected.to_provider and not self.provider ) or
+                                                                                 ( selected.to_provider and self.provider ) );
+select many toNetwork_port_msgs related by toNetwork_msgs->PortMessage[R420] where ( selected.port_name == self.name );
+inbound = false;
+for each port_msg in toNetwork_port_msgs
+  T::push_buffer();
+  select many parms related by port_msg->InvocableObject[R427]->FormalParameter[R429.''declares signature with''];
+  for each parm in parms
+    pname = STRING::substr( s:parm.name, begin:2, end:-1 );
+    firstchar = STRING::substr( s:pname, begin:0, end:1 );
+    fname = T::sub( format:"c", s:firstchar ) + STRING::substr( s:pname, begin:1, end:-1 );
+    setm = "set" + fname;
+    T::include(file:"interface/t.port.msgset.member.java");
+  end for;
+  msg_sets = T::body();
+  LOG::LogInfo( message:"++am " + msg_sets );
+  T::clear();
+  T::pop_buffer();
   mname = port_msg.msg_name;
-  LOG::LogInfo( message:"++am " + comp + " " + port + " " + mname );
-  T::include(file:"interface/t.port.controllermsg.java");
+//  T::include(file:"interface/t.port.controllermsg.java");
 end for;
-inbound_message_block = T::body();
+tonet_message_block = T::body();
 T::clear();
 
 select one file related by self->File[R401];

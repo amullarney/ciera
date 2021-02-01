@@ -51,9 +51,9 @@ public class ${self.name}MsgController {
         return singleton;
 	}
 // inbound
-${inbound_message_block}
+${fromnet_message_block}
 	
 // outbound
-${outbound_message_block}
+${tonet_message_block}
 
 }
