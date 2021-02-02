@@ -127,6 +127,7 @@ INSERT INTO O_TFR
 	"ba5eda7a-def5-0000-0000-000000000000",
 	1,
 	'// render Java msgcontroller class.
+// This class handles network messages, both incoming to xtUML and outgoing to the browser client.
 
 comp = self.comp_name;
 port = self.port_name;
@@ -137,9 +138,35 @@ select many fromNetwork_msgs related by self->Interface[R418]->Message[R419] whe
 select many fromNetwork_port_msgs related by fromNetwork_msgs->PortMessage[R420] where ( selected.port_name == self.name );
 inbound = true;
 msg_sets = "";  // for now...
+parmlist = "";
 for each port_msg in fromNetwork_port_msgs
+  select many parms related by port_msg->InvocableObject[R427]->FormalParameter[R429.''declares signature with''];
+  sep = "";
+  parmlist = "";
+  for each parm in parms
+  	select one dtyp related by parm->TypeReference[R431.''is typed by''];
+  	conversion = "";
+  	closeParen = "";
+  	tname = dtyp.type_name;
+  	if ( "String" != tname )
+  	  closeParen = " )";
+  	  if ( "boolean" == tname )
+  	  	conversion = "Boolean.parseBoolean( ";
+  	  elif ( "int" == tname )
+  	  	conversion = "Integer.parseInt( ";
+  	  elif ( "double" == tname )
+  	  	conversion ="Double.parseDouble( ";
+  	  end if;
+    end if;
+    pname = STRING::substr( s:parm.name, begin:2, end:-1 );
+    firstchar = STRING::substr( s:pname, begin:0, end:1 );
+    fname = T::sub( format:"c", s:firstchar ) + STRING::substr( s:pname, begin:1, end:-1 );
+    getm = conversion + "message.get" + fname + "()" + closeParen;
+    parmlist = parmlist + sep + getm;
+    sep = ", ";
+  end for;
   mname = port_msg.msg_name;
-//  T::include(file:"interface/t.port.controllermsg.java");
+  T::include(file:"interface/t.port.msgctrlr.msg.java");
 end for;
 fromnet_message_block = T::body();
 T::clear();
@@ -152,19 +179,34 @@ inbound = false;
 for each port_msg in toNetwork_port_msgs
   T::push_buffer();
   select many parms related by port_msg->InvocableObject[R427]->FormalParameter[R429.''declares signature with''];
+  sep = "";
+  parmlist = "";
   for each parm in parms
+  	select one dtyp related by parm->TypeReference[R431.''is typed by''];
+  	ptype = "String ";
+  	tname = dtyp.type_name;
+  	if ( "String" != tname )
+  	  if ( "boolean" == tname )
+  	  	ptype = "Boolean ";
+  	  elif ( "int" == tname )
+  	  	ptype = "Integer ";
+  	  elif ( "double" == tname )
+  	  	ptype ="Double ";
+  	  end if;
+    end if;
     pname = STRING::substr( s:parm.name, begin:2, end:-1 );
     firstchar = STRING::substr( s:pname, begin:0, end:1 );
     fname = T::sub( format:"c", s:firstchar ) + STRING::substr( s:pname, begin:1, end:-1 );
     setm = "set" + fname;
     T::include(file:"interface/t.port.msgset.member.java");
+    parmlist = parmlist + sep + ptype + pname;
+    sep = ", ";
   end for;
   msg_sets = T::body();
-  LOG::LogInfo( message:"++am " + msg_sets );
   T::clear();
   T::pop_buffer();
   mname = port_msg.msg_name;
-//  T::include(file:"interface/t.port.controllermsg.java");
+  T::include(file:"interface/t.port.msgctrlr.msg.java");
 end for;
 tonet_message_block = T::body();
 T::clear();
