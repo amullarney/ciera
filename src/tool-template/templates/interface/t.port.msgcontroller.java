@@ -1,5 +1,7 @@
 package ${pkg};
 
+import payrolldeployment.${comp};
+
 import io.ciera.runtime.summit.application.IApplication;
 import io.ciera.runtime.summit.application.IRunContext;
 import io.ciera.runtime.summit.application.tasks.GenericExecutionTask;
@@ -33,7 +35,7 @@ import org.springframework.web.util.HtmlUtils;
 
 //The Spring framework arranges for an instance of this class to be
 //created, passing an instance of SimpMessagingTemplate as an argument,
-//which enables messages to be sent to and received from JavaScript clients.
+//which enables messages to be sent to, and received from, JavaScript clients.
 
 @Controller
 public class ${self.name}MsgController {

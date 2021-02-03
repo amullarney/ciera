@@ -70,21 +70,6 @@ select any port_mark from instances of Mark where ( selected.markable_name == "P
 if ( not_empty port_mark )
   self.render_msgclasses();
   self.render_msgcontroller();
-  LOG::LogInfo( message:"++am Found Port marked for message generation" );
-  LOG::LogInfo( message:"++am self name : " + self.name );
-  LOG::LogInfo( message:"++am port name : " + self.port_name );
-  LOG::LogInfo( message:"++am iface name : " + self.iface_name );
-  LOG::LogInfo( message:"++am provider port name : " + self.provider_port_name );
-  LOG::LogInfo( message:"++am comp name : " + self.comp_name );
-  LOG::LogInfo( message:"++am base class : " + self.base_class );
-  select one other related by self->Port[R4160.''satisfies required''];
-  if ( not_empty other )
-    LOG::LogInfo( message:"++am other that satisfies required : " + other.name );
-  end if;
-  select one other related by self->Port[R4160.''satisfies provided''];
-  if ( not_empty other )
-    LOG::LogInfo( message:"++am other that satisfies provided : " + other.name );
-  end if;
 end if;
 ',
 	1,
@@ -128,6 +113,7 @@ INSERT INTO O_TFR
 	1,
 	'// render Java msgcontroller class.
 // This class handles network messages, both incoming to xtUML and outgoing to the browser client.
+// Note: parameter names are derived by stripping the "p_" prefix from the FormalParameter names. @TODO
 
 comp = self.comp_name;
 port = self.port_name;
@@ -140,10 +126,15 @@ inbound = true;
 msg_sets = "";  // for now...
 parmlist = "";
 for each port_msg in fromNetwork_port_msgs
-  select many parms related by port_msg->InvocableObject[R427]->FormalParameter[R429.''declares signature with''];
+  select any parm related by port_msg->InvocableObject[R427]->FormalParameter[R429.''declares signature with''];
+  select one prev_parm related by parm->FormalParameter[R404.''follows''];
+  while ( not_empty prev_parm )
+  	parm = prev_parm;
+    select one prev_parm related by parm->FormalParameter[R404.''follows''];
+  end while;
   sep = "";
   parmlist = "";
-  for each parm in parms
+  while ( not_empty parm )
   	select one dtyp related by parm->TypeReference[R431.''is typed by''];
   	conversion = "";
   	closeParen = "";
@@ -164,7 +155,8 @@ for each port_msg in fromNetwork_port_msgs
     getm = conversion + "message.get" + fname + "()" + closeParen;
     parmlist = parmlist + sep + getm;
     sep = ", ";
-  end for;
+    select one parm related by parm->FormalParameter[R404.''precedes''];
+  end while;
   mname = port_msg.msg_name;
   T::include(file:"interface/t.port.msgctrlr.msg.java");
 end for;
@@ -178,10 +170,15 @@ select many toNetwork_port_msgs related by toNetwork_msgs->PortMessage[R420] whe
 inbound = false;
 for each port_msg in toNetwork_port_msgs
   T::push_buffer();
-  select many parms related by port_msg->InvocableObject[R427]->FormalParameter[R429.''declares signature with''];
+  select any parm related by port_msg->InvocableObject[R427]->FormalParameter[R429.''declares signature with''];
+  select one prev_parm related by parm->FormalParameter[R404.''follows''];
+  while ( not_empty prev_parm )
+  	parm = prev_parm;
+    select one prev_parm related by parm->FormalParameter[R404.''follows''];
+  end while;
   sep = "";
   parmlist = "";
-  for each parm in parms
+  while ( not_empty parm )
   	select one dtyp related by parm->TypeReference[R431.''is typed by''];
   	ptype = "String ";
   	tname = dtyp.type_name;
@@ -201,7 +198,8 @@ for each port_msg in toNetwork_port_msgs
     T::include(file:"interface/t.port.msgset.member.java");
     parmlist = parmlist + sep + ptype + pname;
     sep = ", ";
-  end for;
+    select one parm related by parm->FormalParameter[R404.''precedes''];
+  end while;
   msg_sets = T::body();
   T::clear();
   T::pop_buffer();
