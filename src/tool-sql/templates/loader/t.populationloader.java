@@ -21,6 +21,11 @@ ${instance_loaders}        default:
     }
 
     @Override
+    public void link(List<Object> instids) throws XtumlException {
+    }
+
+    
+    @Override
     public void batchRelate() throws XtumlException {
 ${batch_relators}    }
 
