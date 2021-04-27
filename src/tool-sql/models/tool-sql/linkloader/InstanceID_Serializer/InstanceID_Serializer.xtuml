@@ -2,9 +2,9 @@
 
 INSERT INTO O_OBJ
 	VALUES ("77e6323b-cb89-4cc9-a176-7a026870d048",
-	'Participant',
+	'InstanceID_Serializer',
 	6,
-	'Participant',
+	'InstanceID_Serializer',
 	'This class captures data about a class that is a participant in the association to be serialized.',
 	"00000000-0000-0000-0000-000000000000");
 INSERT INTO O_NBATTR

@@ -2,9 +2,9 @@
 
 INSERT INTO O_OBJ
 	VALUES ("4ee77a1c-599d-4ea8-93ac-82e28ec6a0fe",
-	'LinkSerializer',
+	'AssociationSerializer',
 	1,
-	'LinkSerializer',
+	'AssociationSerializer',
 	'A serializer for the various types of link (association) serializers required to support 
 persistence of the range of association types in the xtUML formalization.
 Link serializers hold values which will be supplied to templates during rendering of serialization code.',
