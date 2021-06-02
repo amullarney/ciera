@@ -52,10 +52,10 @@ public class ${self.name}MsgController {
     public static ${self.name}MsgController Singleton() {
         return singleton;
 	}
-// inbound
-${fromnet_message_block}
-	
-// outbound
-${tonet_message_block}
 
+    // inbound fom client
+${fromnet_message_block}\
+	
+    // outbound to client
+${tonet_message_block}\
 }

@@ -13,7 +13,7 @@
     public void Send${mname}Msg( ${parmlist} ) throws Exception {
         ${mname}Msg msg = new ${mname}Msg();
         msg.setMessageName( "${mname}");
-${msg_sets}
+${msg_sets}\
         String topic = "/topic/${comp}/";
         this.template.convertAndSend( topic, msg );
     }
